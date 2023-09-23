@@ -17,16 +17,18 @@ public class CompanyService:ICompanyService
 {
     private readonly IMongoCollection<Company> _mongoCollection;
     private readonly IMapper _mapper;
+    private readonly IMongoDatabase _mongo;
     public CompanyService(IOptions<MongoDbSettings> mongoDbSettings, IMapper mapper)
     {
         _mapper = mapper;
         var mongoClient = new MongoClient(mongoDbSettings.Value.ConnectionString);
-        var mongoDb = mongoClient.GetDatabase(mongoDbSettings.Value.DatabaseName);
-        _mongoCollection = mongoDb.GetCollection<Company>($"{typeof(Company).Name}");
+        _mongo = mongoClient.GetDatabase(mongoDbSettings.Value.DatabaseName);
+        _mongoCollection = _mongo.GetCollection<Company>($"{typeof(Company).Name}");
     }
     public async Task Create(CompanyDto company)
     {
         var creatableCompany = _mapper.Map<CompanyDto, Company>(company);
+        creatableCompany.Id = IntegerIdIncreament.GetNextId($"{typeof(Company).Name}", _mongo);
         await _mongoCollection.InsertOneAsync(creatableCompany);
     }
 

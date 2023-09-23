@@ -8,6 +8,7 @@ using System.Text.Json.Serialization;
 using MongoDB.Bson;
 using MongoDB.Bson.IO;
 using MongoDB.Bson.Serialization;
+using MongoDB.Driver;
 
 namespace CompanyAndContactManagement.HttpApi.Models.Company;
 
@@ -15,6 +16,7 @@ namespace CompanyAndContactManagement.HttpApi.Models.Company;
 public class Company
 {
     [BsonId]
+    [BsonRepresentation(BsonType.Int32)]
     public int Id { get; set; }
 
     [BsonElement("Name")]
@@ -25,6 +27,8 @@ public class Company
     
     [BsonSerializer(typeof(ExtraFieldsDictionarySerializer))]
     public Dictionary<string,object> ExtraFields { get; set; } = new ();
+
+   
 }
 
 

@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using CompanyAndContactManagement.HttpApi.DTOs;
 using CompanyAndContactManagement.HttpApi.DTOs.Contact;
+using CompanyAndContactManagement.HttpApi.Models;
 using CompanyAndContactManagement.HttpApi.Settings;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
@@ -11,17 +12,19 @@ public class ContactService:IContactService
 {
     private readonly IMongoCollection<Contact> _mongoCollection;
     private readonly IMapper _mapper;
+    private readonly IMongoDatabase _mongo;
     public ContactService(IOptions<MongoDbSettings> mongoDbSettings, IMapper mapper)
     {
         _mapper = mapper;
         var mongoClient = new MongoClient(mongoDbSettings.Value.ConnectionString);
-        var mongoDb = mongoClient.GetDatabase(mongoDbSettings.Value.DatabaseName);
-        _mongoCollection = mongoDb.GetCollection<Contact>($"{typeof(Contact).Name}");
+        _mongo = mongoClient.GetDatabase(mongoDbSettings.Value.DatabaseName);
+        _mongoCollection = _mongo.GetCollection<Contact>($"{typeof(Contact).Name}");
     }
     public async Task Create(ContactDto contact)
     {
-        var creatableCompany = _mapper.Map<ContactDto, Contact>(contact);
-        await _mongoCollection.InsertOneAsync(creatableCompany);
+        var creatableContact = _mapper.Map<ContactDto, Contact>(contact);
+        creatableContact.Id = IntegerIdIncreament.GetNextId($"{typeof(Contact).Name}", _mongo);
+        await _mongoCollection.InsertOneAsync(creatableContact);
     }
 
     public async Task<ContactDto> Update(int id, ContactDto contact)
