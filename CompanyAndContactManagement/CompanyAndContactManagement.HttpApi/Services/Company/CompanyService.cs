@@ -13,12 +13,12 @@ namespace CompanyAndContactManagement.HttpApi.Services.Company;
 
 using CompanyAndContactManagement.HttpApi.Models.Company;
 
-public class CompanyService:ICompanyService
+public class CompanyService:BaseService<Company>,ICompanyService
 {
     private readonly IMongoCollection<Company> _mongoCollection;
     private readonly IMapper _mapper;
     private readonly IMongoDatabase _mongo;
-    public CompanyService(IOptions<MongoDbSettings> mongoDbSettings, IMapper mapper)
+    public CompanyService(IOptions<MongoDbSettings> mongoDbSettings, IMapper mapper):base(mongoDbSettings)
     {
         _mapper = mapper;
         var mongoClient = new MongoClient(mongoDbSettings.Value.ConnectionString);
@@ -51,9 +51,13 @@ public class CompanyService:ICompanyService
     public async Task<CompanyDto> Get(int id) =>
         _mapper.Map<Company, CompanyDto>((await _mongoCollection.FindAsync(_ => true)).FirstOrDefault());
 
-    public async Task<List<CompanyDto>> GetList()
+
+    public async Task<List<CompanyDto>> GetList( GetCompaniesInput input)
     {
-        var companies = await _mongoCollection.Find(_ => true).ToListAsync();
+        var query=await base.GetAggregateAsync();
+        
+        query = ApplyFilter(query, input.Filters,input.GlobalFilter);
+        var companies = await query.ToListAsync();
         return _mapper.Map<List<Company>, List<CompanyDto>>(companies);
     }
 

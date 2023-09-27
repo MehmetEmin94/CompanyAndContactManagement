@@ -50,11 +50,11 @@ public class CompaniesController:ControllerBase
     }
 
     [HttpGet]
-    public async Task<ServiceResponse<List<CompanyDto>>> GetList()
+    public async Task<ServiceResponse<List<CompanyDto>>> GetList(GetCompaniesInput input)
     {
         return new ServiceResponse<List<CompanyDto>>()
         {
-            Value = await _companyService.GetList()
+            Value = await _companyService.GetList(input)
         };
     }
 

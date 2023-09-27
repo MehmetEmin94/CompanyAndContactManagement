@@ -17,7 +17,7 @@ public interface ICompanyService
     
     Task<CompanyDto> Get(int id);
     
-    Task<List<CompanyDto>> GetList();
+    Task<List<CompanyDto>> GetList(GetCompaniesInput input);
     
     Task<CompanyDto> AddNewFields(int id,List<ExtraFields> fields);
 }
